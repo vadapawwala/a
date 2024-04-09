@@ -1,0 +1,170 @@
+SET A]
+Q1] Write a python program to Prepare Scatter Plot using MatplotLib library
+(Use Iris.csv).
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Read the CSV file using pandas
+data = pd.read_csv('iris.csv')
+
+# Extract the required columns for the scatter plot
+x = data['SepalLengthCm']
+y = data['SepalWidthCm']
+species = data['Species']
+
+# Create a scatter plot
+plt.scatter(x[species=='Iris-setosa'], y[species=='Iris-setosa'], c='red', label='Setosa')
+plt.scatter(x[species=='Iris-versicolor'], y[species=='Iris-versicolor'], c='blue', label='Versicolor')
+plt.scatter(x[species=='Iris-virginica'], y[species=='Iris-virginica'], c='green', label='Virginica')
+
+# Add labels and title to the plot
+plt.xlabel('Sepal Length (cm)')
+plt.ylabel('Sepal Width (cm)')
+plt.title('Sepal Length vs Sepal Width')
+
+# Add legend to differentiate the species
+plt.legend()
+
+# Display the scatter plot
+plt.show()
+
+
+
+
+Q2]  Write a python program to find all null values in a given data set and
+replace them with mean using SimpleImputer (Use Iris.csv)
+
+
+import pandas as pd
+from sklearn.impute import SimpleImputer
+
+iris_df = pd.read_csv('iris.csv')
+
+print("Original Dataset:")
+print(iris_df)
+
+def replace_null_with_mean(dataset):
+    numeric_cols = dataset.select_dtypes(include=['number']).columns
+    imputer = SimpleImputer(strategy='mean')
+    
+    for col in numeric_cols:
+        dataset[col] = imputer.fit_transform(dataset[[col]])
+    
+    return dataset
+
+iris_df_imputed = replace_null_with_mean(iris_df)
+
+print("\nDataset after replacing null values with mean:")
+print(iris_df_imputed)
+
+
+
+Q3] Write a python program to convert categorical values to numeric format in
+a given dataset using LabelEncoder and OneHotEncoder (Use Iris.csv).
+(use or program if 1st is not working).
+
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+
+iris_df = pd.read_csv('iris.csv')
+
+print("Original Dataset:")
+print(iris_df)
+
+def label_encode_categorical(dataset, columns):
+    label_encoder = LabelEncoder()
+
+    for column in columns:
+        dataset[column] = label_encoder.fit_transform(dataset[column])
+
+    return dataset
+
+def one_hot_encode_categorical(dataset, columns):
+    one_hot_encoder = OneHotEncoder(drop='first', sparse=False)
+
+    for column in columns:
+        encoded_features = one_hot_encoder.fit_transform(dataset[[column]])
+        encoded_df = pd.DataFrame(encoded_features, columns=[f"{column}_{label}" 
+                    for label in one_hot_encoder.get_feature_names_out([column])])
+        dataset = pd.concat([dataset, encoded_df], axis=1)
+        dataset = dataset.drop(column, axis=1)
+
+    return dataset
+
+# Identify categorical columns in the dataset
+categorical_columns = iris_df.select_dtypes(include=['object']).columns
+
+# Label encode categorical columns
+iris_df_encoded_label = label_encode_categorical(iris_df.copy(), categorical_columns)
+
+# Display dataset after label encoding
+print("\nDataset after Label Encoding:")
+print(iris_df_encoded_label)
+
+# One-hot encode categorical columns
+iris_df_encoded_onehot = one_hot_encode_categorical(iris_df.copy(), categorical_columns)
+
+# Display dataset after one-hot encoding
+print("\nDataset after One-Hot Encoding:")
+print(iris_df_encoded_onehot)
+
+
+
+or
+
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+
+# Load the dataset
+data = pd.read_csv('iris.csv')
+
+# Select the categorical columns
+categorical_cols = ['Species']  # Add more columns if needed
+
+# Convert categorical values to numeric using LabelEncoder
+label_encoder = LabelEncoder()
+for col in categorical_cols:
+    data[col] = label_encoder.fit_transform(data[col])
+
+# Convert categorical values to one-hot encoding using OneHotEncoder
+onehot_encoder = OneHotEncoder(sparse=False)
+onehot_encoded = onehot_encoder.fit_transform(data[categorical_cols])
+
+# Create a new DataFrame with one-hot encoded columns
+onehot_df = pd.DataFrame(onehot_encoded, columns=onehot_encoder.get_feature_names(categorical_cols))
+
+# Concatenate the one-hot encoded DataFrame with the original dataset
+data_encoded = pd.concat([data, onehot_df], axis=1)
+
+# Display the encoded dataset
+print(data_encoded)
+
+
+
+
+Q4] Write a python program to scale values in a given dataset using
+standardization technique (Salary_Data.csv).
+
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+
+
+df = pd.read_csv('salary_data.csv')
+
+
+salary_column = df[['Salary']]
+
+# Initialize the standard scaler
+scaler = StandardScaler()
+
+# Fit and transform the data
+df['Standardized_Salary'] = scaler.fit_transform(salary_column)
+
+# Save the standardized data to a new CSV file if needed
+df.to_csv('Salary_Data_Standardized.csv', index=False)
+
+print(df)
+
+

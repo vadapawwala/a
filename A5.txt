@@ -1,0 +1,207 @@
+Set A
+1. Write a python program to implement the k-means algorithm on a
+synthetic dataset. (Use make_blobs module from sklearn.datasets)
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_blobs
+from sklearn.cluster import KMeans
+
+# Generating synthetic dataset
+X, _ = make_blobs(n_samples=300, centers=4, cluster_std=0.60, random_state=0)
+
+# Visualizing the data
+plt.scatter(X[:, 0], X[:, 1], s=50)
+plt.xlabel("Feature 1")
+plt.ylabel("Feature 2")
+plt.title("Synthetic Dataset")
+plt.show()
+
+# Applying K-Means algorithm
+kmeans = KMeans(n_clusters=4)
+kmeans.fit(X)
+centroids = kmeans.cluster_centers_
+labels = kmeans.labels_
+
+# Visualizing the clusters and centroids
+plt.scatter(X[:, 0], X[:, 1], c=labels, s=50, cmap='viridis')
+plt.scatter(centroids[:, 0], centroids[:, 1], marker='*', s=200, c='red', label='Centroids')
+plt.xlabel("Feature 1")
+plt.ylabel("Feature 2")
+plt.title("K-Means Clustering")
+plt.legend()
+plt.show()
+
+
+
+2. Write a python program to implement Agglomerative clustering on a
+synthetic dataset. (Use make_blobs module from sklearn.datasets)
+
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_blobs
+from sklearn.cluster import AgglomerativeClustering
+from scipy.cluster.hierarchy import dendrogram, linkage
+
+# Generating synthetic dataset
+X, _ = make_blobs(n_samples=300, centers=4, cluster_std=0.60, random_state=0)
+
+# Visualizing the data
+plt.scatter(X[:, 0], X[:, 1], s=50)
+plt.xlabel("Feature 1")
+plt.ylabel("Feature 2")
+plt.title("Synthetic Dataset")
+plt.show()
+
+# Applying Agglomerative clustering
+agg_clustering = AgglomerativeClustering(n_clusters=4)
+labels = agg_clustering.fit_predict(X)
+
+# Visualizing the clusters
+plt.scatter(X[:, 0], X[:, 1], c=labels, s=50, cmap='viridis')
+plt.xlabel("Feature 1")
+plt.ylabel("Feature 2")
+plt.title("Agglomerative Clustering")
+plt.show()
+
+# Plotting the dendrogram
+linkage_matrix = linkage(X, 'ward')
+dendrogram(linkage_matrix)
+plt.title("Hierarchical Clustering Dendrogram")
+plt.xlabel("Sample Index")
+plt.ylabel("Cluster Distance")
+plt.show()
+
+
+
+Set B (Practice Assignment)
+1. Consider the given dataset in the Mall_Customers.csv file:
+a) Find the optimal number of clusters using the Elbow method. (Plot the
+graph as Number of clusters versus WCSS)
+b) Apply k-means on the given data with optimal value of k (found in (a)).
+
+
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import pairwise_distances_argmin_min
+
+# Load the dataset
+data = pd.read_csv("Mall_Customers.csv")
+
+# Extract relevant features
+features = data.iloc[:, [3, 4]].values  #  the interesting features are in columns 4 and 5
+
+# Standardize the features
+scaler = StandardScaler()
+features_scaled = scaler.fit_transform(features)
+
+# Elbow Method to find the optimal number of clusters (k)
+wcss = []
+max_clusters = 10  
+
+for i in range(1, max_clusters + 1):
+    kmeans = KMeans(n_clusters=i, init='k-means++', random_state=42)
+    kmeans.fit(features_scaled)
+    wcss.append(kmeans.inertia_)
+
+# Plotting the Elbow Method graph
+plt.plot(range(1, max_clusters + 1), wcss, marker='o')
+plt.title('Elbow Method for Optimal k')
+plt.xlabel('Number of Clusters (k)')
+plt.ylabel('WCSS (Within-Cluster Sum of Squares)')
+plt.show()
+
+# Find the optimal k using the Elbow Method
+optimal_k = np.argmin(np.gradient(wcss)) + 1
+print(f"Optimal number of clusters (k) using the Elbow method: {optimal_k}")
+
+# Apply K-Means with the optimal number of clusters
+kmeans = KMeans(n_clusters=optimal_k, init='k-means++', random_state=42)
+kmeans.fit(features_scaled)
+
+# Assign clusters to each data point
+data['Cluster'] = kmeans.predict(features_scaled)
+
+# Get the cluster centroids
+centroids = scaler.inverse_transform(kmeans.cluster_centers_)
+
+# Find the index of the nearest data point to each centroid
+closest_points_idx, _ = pairwise_distances_argmin_min(centroids, features)
+
+# Display result
+for i, centroid in enumerate(centroids):
+    closest_point = features[closest_points_idx[i]]
+    print(f"Cluster {i+1} Centroid: {centroid}, Closest Data Point: {closest_point}")
+
+# Optionally, you can visualize the clustering result
+plt.scatter(features[:, 0], features[:, 1], c=data['Cluster'], cmap='viridis')
+plt.scatter(centroids[:, 0], centroids[:, 1], marker='*', s=200, c='red', label='Centroids')
+plt.xlabel("Feature 1")
+plt.ylabel("Feature 2")
+plt.title("K-Means Clustering")
+plt.legend()
+plt.show()
+
+
+
+
+2. Consider the given dataset in the penguins.CSV file:
+a) Form clusters using Agglomerative clustering to plot dendrogram.
+Identify the correct number of clusters from dendrogram.
+b) Show all clusters in different colors using a scatter plot.
+
+
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.cluster import AgglomerativeClustering
+from sklearn.preprocessing import LabelEncoder
+from scipy.cluster.hierarchy import dendrogram, linkage
+
+# Load the dataset
+data = pd.read_csv("penguins.csv")
+
+# Drop rows with missing values
+data = data.dropna()
+
+# Extract relevant features
+numeric_features = data.select_dtypes(include=[np.number]).values
+categorical_features = data.select_dtypes(exclude=[np.number])
+
+# Encode categorical features into numerical values
+label_encoder = LabelEncoder()
+encoded_categorical_features = categorical_features.apply(label_encoder.fit_transform).values
+
+# Combine numeric and encoded categorical features
+features = np.hstack((numeric_features, encoded_categorical_features))
+
+# Hierarchical Agglomerative Clustering
+linkage_matrix = linkage(features, 'ward')
+
+# Plotting the dendrogram
+dendrogram(linkage_matrix, truncate_mode='level', p=3, leaf_rotation=45, leaf_font_size=10, show_contracted=True)
+plt.title("Dendrogram for Agglomerative Clustering")
+plt.xlabel("Sample Index")
+plt.ylabel("Cluster Distance")
+plt.show()
+
+# Apply Agglomerative Clustering with a chosen number of clusters
+optimal_clusters = 3  # Adjust this based on your observation from the dendrogram
+agg_clustering = AgglomerativeClustering(n_clusters=optimal_clusters)
+labels = agg_clustering.fit_predict(features)
+
+# Show all clusters in different colors using a scatter plot
+plt.scatter(features[:, 0], features[:, 1], c=labels, cmap='viridis')
+plt.xlabel("Feature 1")
+plt.ylabel("Feature 2")
+plt.title("Agglomerative Clustering")
+plt.show()
+

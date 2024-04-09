@@ -1,0 +1,75 @@
+#Apriori
+
+import pandas as pd
+from mlxtend.frequent_patterns import association_rules
+from mlxtend.frequent_patterns import apriori
+
+df1 = [['eggs','milk','bread'],
+      ['eggs','apple'],
+     ['milk','bread'],
+     ['apple','milk'],
+     ['milk','apple','bread']]
+
+from mlxtend.preprocessing import TransactionEncoder
+
+te = TransactionEncoder()
+te_array= te.fit(df1).transform(df1)
+df=pd.DataFrame(te_array,columns=te.columns_)
+
+# Use FP-Growth instead of Apriori
+from mlxtend.frequent_patterns import fpgrowth
+
+freq_items = fpgrowth(df, min_support=0.5, use_colnames=True)
+
+print(freq_items)
+
+rules = association_rules(freq_items, metric='support', min_threshold=0.05)
+rules = rules.sort_values(['support', 'confidence'], ascending=[False, False])
+print(rules)
+
+
+
+#FPGrowth
+import pandas as pd
+from mlxtend.preprocessing import TransactionEncoder
+from mlxtend.frequent_patterns import apriori, fpmax, fpgrowth
+
+
+dataset = [['Milk', 'Onion', 'Nutmeg', 'Kidney Beans', 'Eggs', 'Yogurt'],
+           ['Dill', 'Onion', 'Nutmeg', 'Kidney Beans', 'Eggs', 'Yogurt'],
+           ['Milk', 'Apple', 'Kidney Beans', 'Eggs'],
+           ['Milk', 'Unicorn', 'Corn', 'Kidney Beans', 'Yogurt'],
+           ['Corn', 'Onion', 'Onion', 'Kidney Beans', 'Ice cream', 'Eggs']]
+
+te = TransactionEncoder()
+te_ary = te.fit(dataset).transform(dataset)
+df = pd.DataFrame(te_ary, columns=te.columns_)
+
+frequent_itemsets = fpgrowth(df, min_support=0.6, use_colnames=True)
+### alternatively:
+#frequent_itemsets = apriori(df, min_support=0.6, use_colnames=True)
+#frequent_itemsets = fpmax(df, min_support=0.6, use_colnames=True)
+
+frequent_itemsets
+
+#eclat
+
+from mlxtend.preprocessing import TransactionEncoder
+from mlxtend.frequent_patterns import eclat
+
+# Sample transaction dataset
+dataset = [['Apple', 'Banana', 'Egg'],
+           ['Banana', 'Egg', 'Milk'],
+           ['Apple', 'Banana'],
+           ['Banana', 'Milk']]
+
+# Convert dataset to one-hot encoded format
+te = TransactionEncoder()
+te_ary = te.fit(dataset).transform(dataset)
+df = pd.DataFrame(te_ary, columns=te.columns_)
+
+# Mining frequent itemsets using Eclat
+frequent_itemsets = eclat(df, min_support=0.3, use_colnames=True)
+
+# Display the frequent itemsets
+print(frequent_itemsets)

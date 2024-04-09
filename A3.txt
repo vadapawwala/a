@@ -1,0 +1,347 @@
+Set A
+1. Write a python program to implement following Linear Regression
+Models for predicting house price: (House_price_prediction.csv)
+i. Simple Linear Regression (Use sqft_living column)
+
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error, r2_score
+
+data = pd.read_csv("House_price_prediction.csv")
+
+# Select the features and target
+X = data["sqft_living"]
+y = data["price"]
+
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+model = LinearRegression()
+
+model.fit(X_train.values.reshape(-1, 1), y_train)
+
+y_pred = model.predict(X_test.values.reshape(-1, 1))
+
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)#measure the proportion of varibility betn dependent variable
+
+print(f"Mean Squared Error (MSE): {mse:.2f}")
+print(f"R-squared (R^2): {r2:.2f}")
+
+
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(10, 6))
+plt.scatter(X_train, y_train, color='blue', alpha=0.7, label='Training Data')
+plt.scatter(X_test, y_test, color='red', alpha=0.7, label='Test Data')
+plt.plot(X_test, y_pred, color='green', linewidth=2, label='Predicted Price')
+plt.xlabel('sqft_living')
+plt.ylabel('price')
+plt.title('Simple Linear Regression Model')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+
+1. Write a python program to implement following Linear Regression
+Models for predicting house price: (House_price_prediction.csv)
+ii. Multiple Linear Regression.
+
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+
+
+data = pd.read_csv("House_price_prediction.csv")
+
+# Convert string columns to categorical variables
+data = pd.get_dummies(data, drop_first=True)
+
+# Handling missing values if any
+data = data.dropna()
+
+# Extracting features (X) and target variable (y)
+X = data.drop('price', axis=1)
+y = data['price']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train the Multiple Linear Regression model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+print("Mean Squared Error:", mse)
+print("R-squared Value:", r2)
+
+plt.scatter(y_test,y_pred)
+plt.xlabel("Actual Prices")
+plt.ylabel("Predicted Prices")
+plt.title("Multiple Linear Regression")
+plt.show()
+
+
+
+2. Write a python program to implement Polynomial Regression for a given
+dataset. (Use Position_Salaries.csv)
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.metrics import mean_squared_error
+
+
+data = pd.read_csv("Position_Salaries.csv")
+
+# Extracting features and target variable
+X = data.iloc[:, 1:2].values
+y = data.iloc[:, 2].values
+
+
+# Since the dataset is small, using all data for training
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Fitting Polynomial Regression to the dataset
+poly_reg = PolynomialFeatures(degree=4)
+X_poly = poly_reg.fit_transform(X)
+
+# Training the Polynomial Regression model
+lin_reg = LinearRegression()
+lin_reg.fit(X_poly, y)
+
+
+plt.scatter(X, y, color='red')
+plt.plot(X, lin_reg.predict(poly_reg.fit_transform(X)), color='blue')
+plt.title('Polynomial Regression')
+plt.xlabel('Position level')
+plt.ylabel('Salary')
+plt.show()
+
+# Predicting a new result with Polynomial Regression
+position_level = 6.5
+salary_pred = lin_reg.predict(poly_reg.fit_transform([[position_level]]))
+print("Predicted Salary for Position Level {}: ${}".format(position_level, salary_pred[0]))
+# Calculating mean squared error
+y_pred = lin_reg.predict(poly_reg.fit_transform(X_test))
+mse = mean_squared_error(y_test, y_pred)
+print("Mean Squared Error:", mse)
+
+
+
+3. Write a python program to implement following Non-linear Regression
+Models on a given dataset:
+i. Decision Tree Regression (Use Position_Salaries.csv)
+
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.metrics import mean_squared_error, r2_score
+import matplotlib.pyplot as plt
+
+data = pd.read_csv("Position_Salaries.csv")
+
+# Extracting features (X) and target variable (y)
+X = data.iloc[:, 1:2].values  
+y = data.iloc[:, 2].values
+
+# Decision Tree Regression model
+regressor = DecisionTreeRegressor(random_state=0)
+regressor.fit(X, y)
+
+
+y_pred = regressor.predict(X)
+
+# Evaluate the model
+mse = mean_squared_error(y, y_pred)
+r2 = r2_score(y, y_pred)
+
+print("Mean Squared Error:", mse)
+print("R-squared Value:", r2)
+
+plt.scatter(X, y, color='red')
+plt.plot(X, y_pred, color='blue')
+plt.title('Decision Tree Regression')
+plt.xlabel('Position level')
+plt.ylabel('Salary')
+plt.show()
+
+
+
+3. Write a python program to implement following Non-linear Regression
+Models on a given dataset:
+ii. Support Vector Regression (Use Position_Salaries.csv)
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVR
+import matplotlib.pyplot as plt
+
+
+data = pd.read_csv("Position_Salaries.csv")
+
+# Extracting features (X) and target variable (y)
+X = data.iloc[:, 1:2].values  
+y = data.iloc[:, 2].values
+
+# Feature Scaling
+sc_X = StandardScaler()
+sc_y = StandardScaler()
+X = sc_X.fit_transform(X)
+y = sc_y.fit_transform(y.reshape(-1, 1)).reshape(-1)
+
+# Support Vector Regression model
+regressor = SVR(kernel='rbf')
+regressor.fit(X, y)
+
+plt.scatter(X, y, color='red')
+plt.plot(X, regressor.predict(X), color='blue')
+plt.title('Support Vector Regression')
+plt.xlabel('Position level (scaled)')
+plt.ylabel('Salary (scaled)')
+plt.show()
+
+
+
+
+Set B (Practice Assignment)
+1. Write a python program to implement Simple Linear Regression to find the
+student’s scores based on their study hours. (Use StudentHoursScores.csv)
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+
+
+data = pd.read_csv('Position_Salaries.csv')
+X = data.iloc[:, 1:2].values  # Independent variable (Level)
+y = data.iloc[:, 2].values    # Dependent variable (Salary)
+
+#Perform simple linear regression
+regressor = LinearRegression()
+regressor.fit(X, y)
+
+
+plt.scatter(X, y, color='red', label='Actual data')
+plt.plot(X, regressor.predict(X), color='blue', label='Linear Regression')
+plt.title('Simple Linear Regression')
+plt.xlabel('Position level')
+plt.ylabel('Salary')
+plt.legend()
+plt.show()
+
+
+
+2. Write a python program to prepare a prediction model for profit using
+multiple linear regression. (50_Startups.csv)
+
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+
+dataset = pd.read_csv('50_Startups.csv')
+X = dataset.iloc[:, :-1].values
+y = dataset.iloc[:, -1].values
+
+# Encoding categorical data
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder
+ct = ColumnTransformer(transformers=[('encoder', OneHotEncoder(), [3])], remainder='passthrough')
+X = np.array(ct.fit_transform(X))
+
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 0)
+
+# Training the Multiple Linear Regression model on the Training set
+from sklearn.linear_model import LinearRegression
+regressor = LinearRegression()
+regressor.fit(X_train, y_train)
+
+# Predicting the Test set results
+y_pred = regressor.predict(X_test)
+
+# Evaluating the model
+from sklearn.metrics import r2_score
+r_squared = r2_score(y_test, y_pred)
+print("R-squared value:", r_squared)
+
+plt.scatter(y_test, y_pred, color = 'blue')
+plt.title('Actual vs Predicted')
+plt.xlabel('Actual')
+plt.ylabel('Predicted')
+plt.show()
+
+
+
+
+3. Consider the given dataset in the Position_Salaries.csv file:
+a) Implement the Simple linear regression on the dataset. Using scatter plot,
+show that Simple linear regression is not fitting well on the given data.
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+
+
+data = pd.read_csv('Position_Salaries.csv')
+X = data.iloc[:, 1:2].values  # Independent variable (Level)
+y = data.iloc[:, 2].values    # Dependent variable (Salary)
+
+#Perform simple linear regression
+regressor = LinearRegression()
+regressor.fit(X, y)
+
+
+plt.scatter(X, y, color='red', label='Actual data')
+plt.plot(X, regressor.predict(X), color='blue', label='Linear Regression')
+plt.title('Simple Linear Regression')
+plt.xlabel('Position level')
+plt.ylabel('Salary')
+plt.legend()
+plt.show()
+
+
+
+
+3. Consider the given dataset in the Position_Salaries.csv file:
+   b) Apply Polynomial regression on the same data and visualize the results.
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LinearRegression
+
+data = pd.read_csv('Position_Salaries.csv')
+X = data.iloc[:, 1:2].values  # Independent variable (Level)
+y = data.iloc[:, 2].values    # Dependent variable (Salary)
+
+#Perform polynomial regression
+poly_reg = PolynomialFeatures(degree=4)
+X_poly = poly_reg.fit_transform(X)
+lin_reg = LinearRegression()
+lin_reg.fit(X_poly, y)
+
+
+plt.scatter(X, y, color='red', label='Actual data')
+plt.plot(X, lin_reg.predict(poly_reg.fit_transform(X)), color='blue', label='Polynomial Regression')
+plt.title('Polynomial Regression')
+plt.xlabel('Position level')
+plt.ylabel('Salary')
+plt.legend()
+plt.show()
